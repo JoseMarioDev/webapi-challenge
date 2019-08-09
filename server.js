@@ -107,14 +107,20 @@ let chores = [
   },
 ];
 //--------------------------------------------
+//get to root test
 server.get('/', (req, res) => {
   res.status(200).json({ message: 'connected successfully' });
 });
 
 //--------------------------------------------
+// get all chores and all people
 
 server.get('/chores', (req, res) => {
-  res.status(200).json(chores);
+  const completed = req.query.sortby || 'completed';
+  const response = chores.sort((a, b) =>
+    a[completed] < b[completed] ? -1 : 1,
+  );
+  res.status(200).json(response);
 });
 
 server.get('/people', (req, res) => {
@@ -122,27 +128,53 @@ server.get('/people', (req, res) => {
 });
 
 //--------------------------------------------
+// get chores for specific ID
 
-server.get('/people/:id', (req, res) => {
-  const peopleId = req.params.id;
-  res.status(200).json(peopleId);
+server.get('/people/:id/chores', (req, res) => {
+  const personId = Number(req.params.id);
+  if (personId) {
+    const chore = chores.filter(chore => chore.assignedTo === personId);
+    res.status(200).json(chore);
+  } else {
+    res.status(404).json({ message: 'ID not found' });
+  }
 });
 
 //___________________________________________
+//delete chore by ID
 
 server.delete('/chores/:id', (req, res) => {
-  const choreId = Number(req.params.id);
-  let deletedChore = chores.filter(chore => chore.id === choreId);
-  chores = chores.filter(chore => {
-    if (chore.id !== choreId) {
-      return chore;
-    }
-  });
-  res.status(200).json(deletedChore);
+  const choreId = req.params.id;
+  if (choreId) {
+    chores.splice(choreId, 1);
+    res
+      .status(201)
+      .json({ message: 'You have successfully deleted this chore.' });
+  } else {
+    res.status(404).json({ message: 'This chore could not be deleted.' });
+  }
 });
 
 //--------------------------------------------
+// create new chore
+server.post('/chores', (req, res) => {
+  newChore = req.body;
+  if (
+    req.body.description &&
+    req.body.completed &&
+    req.body.id &&
+    req.body.assignedTo
+  ) {
+    chores.push(newChore);
+    res.status(200).json(newChore);
+  } else {
+    res.status(400).json({
+      message: 'You must have a id, description assignedTo, and completed.',
+    });
+  }
+});
 
+//-----------------------------------------------
 server.post('/chores/:id', (req, res) => {
   const choreId = Number(req.params.id);
   const newChore = req.body;
@@ -152,9 +184,10 @@ server.post('/chores/:id', (req, res) => {
 });
 
 //--------------------------------------------
+//update chore by ID
 
-server.get('/people', (req, res) => {
-  res.status(200).json(people);
+server.put('/chores/:id', (req, res) => {
+  
 });
 
 //--------------------------------------------
