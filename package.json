@@ -1,7 +1,7 @@
 {
   "name": "webapi-challenge",
   "version": "1.0.0",
-  "description": "## Description",
+  "description": "Description",
   "main": "index.js",
   "scripts": {
     "server": "nodemon index.js",
